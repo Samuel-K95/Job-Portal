@@ -1,5 +1,6 @@
 import Navigation from "@/components/navigation/Navigation";
 import "./globals.css";
+import Footer from "@/components/Footer";
 
 export default function RootLayout({
   children,
@@ -8,9 +9,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={``}>
+      <body className="bg-gray-100 ">
         <Navigation />
         {children}
+        <Footer />
       </body>
     </html>
   );
