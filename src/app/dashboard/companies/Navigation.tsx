@@ -44,13 +44,8 @@ const Navigation = () => {
       </div>
 
       <div className="hidden md:flex gap-3">
-        <Link href="/login">
-          <BlueButton text="Log In" />
-        </Link>
-
-        <Link href="/signup">
-          <WhiteButton text="Sign Up" />
-        </Link>
+        <BlueButton text="Log In" />
+        <WhiteButton text="Sign Up" />
       </div>
 
       {/* Mobile Hamburger */}
@@ -82,11 +77,11 @@ const Navigation = () => {
               ))}
             </nav>
             <div className="mt-auto flex flex-col gap-3">
-              <Link href="/login" onClick={() => router.push("/login")}>
+              <Link href="/login">
                 <BlueButton text="Log In" />
               </Link>
 
-              <Link href="/signup" onClick={() => router.push("/signup")}>
+              <Link href="/signup">
                 <WhiteButton text="Sign Up" />
               </Link>
             </div>
