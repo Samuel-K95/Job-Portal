@@ -1,14 +1,15 @@
-// components/jobs/JobList.tsx
 "use client";
 
 import { dummyJobs, Job } from "@/data/JobsData";
 import JobCard from "./JobCard";
 import SearchIcon from "@mui/icons-material/Search";
 import LocationOnOutlinedIcon from "@mui/icons-material/LocationOnOutlined";
+import { useRouter } from "next/navigation";
 
 const JobList = () => {
   // In a real app, jobs would come from props or a global state/fetch
   const jobs: Job[] = dummyJobs;
+  const router = useRouter();
 
   return (
     <div className="w-full flex flex-col gap-6">
@@ -38,7 +39,13 @@ const JobList = () => {
       {/* Job Listings */}
       <div className="space-y-6">
         {jobs.map((job) => (
-          <JobCard key={job.id} job={job} />
+          <div
+            key={job.id}
+            onClick={() => router.push(`${job.id}`)}
+            className="hover:cursor-pointer"
+          >
+            <JobCard job={job} />
+          </div>
         ))}
       </div>
     </div>

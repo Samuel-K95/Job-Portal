@@ -1,3 +1,4 @@
+"use client";
 import Filter from "@/components/Filter";
 import Hero from "@/components/Hero";
 import JobList from "@/components/jobs/JobList";
