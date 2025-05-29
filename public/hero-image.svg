@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="800" height="600" viewBox="0 0 800 600" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background Elements -->
+  <circle cx="400" cy="300" r="250" fill="#E8F0FE" opacity="0.5"/>
+  <circle cx="400" cy="300" r="200" fill="#C7D9FB" opacity="0.3"/>
+  
+  <!-- Main Device -->
+  <rect x="200" y="150" width="400" height="300" rx="20" fill="#0034D1"/>
+  <rect x="210" y="160" width="380" height="280" rx="15" fill="white"/>
+  
+  <!-- Screen Content -->
+  <!-- Header -->
+  <rect x="230" y="180" width="120" height="20" rx="4" fill="#0034D1" opacity="0.1"/>
+  
+  <!-- Job Cards -->
+  <rect x="230" y="220" width="340" height="60" rx="8" fill="#F3F4F6"/>
+  <circle cx="260" y="250" r="15" fill="#0034D1" opacity="0.2"/>
+  <rect x="290" y="235" width="150" height="10" rx="2" fill="#0034D1" opacity="0.2"/>
+  <rect x="290" y="255" width="100" height="8" rx="2" fill="#0034D1" opacity="0.1"/>
+  
+  <rect x="230" y="290" width="340" height="60" rx="8" fill="#F3F4F6"/>
+  <circle cx="260" y="320" r="15" fill="#0034D1" opacity="0.2"/>
+  <rect x="290" y="305" width="150" height="10" rx="2" fill="#0034D1" opacity="0.2"/>
+  <rect x="290" y="325" width="100" height="8" rx="2" fill="#0034D1" opacity="0.1"/>
+  
+  <rect x="230" y="360" width="340" height="60" rx="8" fill="#F3F4F6"/>
+  <circle cx="260" y="390" r="15" fill="#0034D1" opacity="0.2"/>
+  <rect x="290" y="375" width="150" height="10" rx="2" fill="#0034D1" opacity="0.2"/>
+  <rect x="290" y="395" width="100" height="8" rx="2" fill="#0034D1" opacity="0.1"/>
+  
+  <!-- Floating Elements -->
+  <circle cx="150" cy="200" r="30" fill="#0034D1" opacity="0.1"/>
+  <circle cx="650" cy="400" r="40" fill="#0034D1" opacity="0.1"/>
+  <circle cx="700" cy="200" r="25" fill="#0034D1" opacity="0.1"/>
+  <circle cx="100" cy="400" r="20" fill="#0034D1" opacity="0.1"/>
+  
+  <!-- Abstract Lines -->
+  <path d="M100 150 Q 150 100, 200 150" stroke="#0034D1" stroke-width="2" fill="none" opacity="0.3"/>
+  <path d="M600 450 Q 650 400, 700 450" stroke="#0034D1" stroke-width="2" fill="none" opacity="0.3"/>
+  <path d="M650 150 Q 700 100, 750 150" stroke="#0034D1" stroke-width="2" fill="none" opacity="0.3"/>
+</svg> 

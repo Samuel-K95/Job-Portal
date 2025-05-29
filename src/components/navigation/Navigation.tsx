@@ -7,6 +7,7 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { Menu, X } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/contexts/AuthContext";
 
 const routes = [
   { name: "Job Search", path: "" },
@@ -19,8 +20,13 @@ const Navigation = () => {
   const pathname = usePathname();
   const currPage = pathname.split("/")[1] || "";
   const [open, setOpen] = useState(false);
-
+  const { user, logout } = useAuth();
   const router = useRouter();
+
+  const handleLogout = async () => {
+    await logout();
+    router.push("/");
+  };
 
   return (
     <nav className="flex justify-between items-center w-full py-3 px-4 border-b relative">
@@ -44,13 +50,26 @@ const Navigation = () => {
       </div>
 
       <div className="hidden md:flex gap-3">
-        <Link href="/login">
-          <BlueButton text="Log In" />
-        </Link>
-
-        <Link href="/signup">
-          <WhiteButton text="Sign Up" />
-        </Link>
+        {user ? (
+          <>
+            <span className="text-gray-700">Welcome, {user.username}</span>
+            <button
+              onClick={handleLogout}
+              className="text-blue-600 hover:text-blue-700 font-medium"
+            >
+              Logout
+            </button>
+          </>
+        ) : (
+          <>
+            <Link href="/login">
+              <BlueButton text="Log In" />
+            </Link>
+            <Link href="/signup">
+              <WhiteButton text="Sign Up" />
+            </Link>
+          </>
+        )}
       </div>
 
       {/* Mobile Hamburger */}
@@ -82,13 +101,26 @@ const Navigation = () => {
               ))}
             </nav>
             <div className="mt-auto flex flex-col gap-3">
-              <Link href="/login" onClick={() => router.push("/login")}>
-                <BlueButton text="Log In" />
-              </Link>
-
-              <Link href="/signup" onClick={() => router.push("/signup")}>
-                <WhiteButton text="Sign Up" />
-              </Link>
+              {user ? (
+                <>
+                  <span className="text-gray-700">Welcome, {user.username}</span>
+                  <button
+                    onClick={handleLogout}
+                    className="text-blue-600 hover:text-blue-700 font-medium"
+                  >
+                    Logout
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link href="/login">
+                    <BlueButton text="Log In" />
+                  </Link>
+                  <Link href="/signup">
+                    <WhiteButton text="Sign Up" />
+                  </Link>
+                </>
+              )}
             </div>
           </div>
 
