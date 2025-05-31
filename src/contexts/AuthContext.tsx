@@ -1,5 +1,6 @@
 "use client";
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 
 interface User {
   id: string;
@@ -36,22 +37,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
 
-  // Set token from localStorage once we're in the browser
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const storedToken = localStorage.getItem('token');
-      if (storedToken) {
-        setToken(storedToken);
-      } else {
-        setLoading(false);
-      }
-    }
-  }, []);
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    setToken(null);
+    setUser(null);
+    setError(null);
+    router.push('/login');
+  };
 
   // API request helper
   const apiRequest = async (endpoint: string, method = 'GET', data?: any) => {
     try {
+      const currentToken = token || localStorage.getItem('token');
+      
       const options: RequestInit = {
         method,
         headers: {
@@ -59,79 +59,121 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         },
       };
 
-      if (token) {
+      if (currentToken) {
         options.headers = {
           ...options.headers,
-          'Authorization': `Token ${token}`,
+          'Authorization': `Token ${currentToken}`,
         };
+      } else if (endpoint !== '/api/accounts/login/' && endpoint !== '/api/accounts/register/') {
+        handleLogout();
+        return null;
       }
 
       if (data && ['POST', 'PUT', 'PATCH'].includes(method)) {
         options.body = JSON.stringify(data);
       }
 
-      const response = await fetch(`https://job-portal-api-cx5r.onrender.com${endpoint}`, options);
-
-      if (response.status === 204) {
-        return { success: true };
-      }
-
+      const response = await fetch(`https://job-portal-api-kiai.onrender.com${endpoint}`, options);
       const responseData = await response.json();
 
       if (!response.ok) {
-        throw new Error(responseData.error || JSON.stringify(responseData));
+        if (response.status === 401 || responseData.detail?.includes('Invalid token')) {
+          handleLogout();
+          return null;
+        }
+        const errorMessage = responseData.detail || responseData.error || JSON.stringify(responseData);
+        setError(errorMessage);
+        return null;
       }
 
       return responseData;
     } catch (err) {
-      const error = err as Error;
-      setError(error.message);
-      throw error;
+      handleLogout();
+      return null;
     }
   };
 
   const fetchUserProfile = async () => {
-    return apiRequest('/api/accounts/profile/');
+    const userData = await apiRequest('/api/accounts/profile/');
+    if (userData) {
+      console.log('Fetched user profile:', userData);
+      setUser(userData);
+      return userData;
+    }
+    return null;
   };
 
   useEffect(() => {
     const checkAuthStatus = async () => {
-      if (token) {
-        try {
-          const userData = await fetchUserProfile();
+      console.log('Checking auth status...');
+      const storedToken = localStorage.getItem('token');
+      console.log('Stored token:', storedToken);
+      
+      if (storedToken) {
+        console.log('Token found, setting token and fetching user profile');
+        setToken(storedToken);
+        const userData = await fetchUserProfile();
+        if (!userData) {
+          console.log('Failed to fetch user profile, logging out');
+          handleLogout();
+        } else {
+          console.log('User profile fetched successfully:', userData);
           setUser(userData);
-        } catch (err) {
-          console.error('Auth verification failed:', err);
-          localStorage.removeItem('token');
-          setToken(null);
-        } finally {
-          setLoading(false);
         }
       } else {
-        setLoading(false);
+        console.log('No token found');
       }
+      setLoading(false);
     };
 
     checkAuthStatus();
-  }, [token]);
+  }, []);
 
   const login = async (credentials: { username: string; password: string }) => {
     try {
+      setError(null);
+      setLoading(true); // Set loading state
+      
       const data = await apiRequest('/api/accounts/login/', 'POST', credentials);
-      setToken(data.token);
-      localStorage.setItem('token', data.token);
-      localStorage.setItem('userId', data.user_id);
-      localStorage.setItem('username', data.username);
-      localStorage.setItem('userType', data.user_type);
+      if (!data) {
+        console.log('Login failed - no data returned');
+        setLoading(false);
+        return null;
+      }
 
+      console.log('Login response:', data);
+      const newToken = data.token;
+      setToken(newToken);
+      localStorage.setItem('token', newToken);
+
+      // Fetch user profile
       const userData = await fetchUserProfile();
-      setUser(userData);
+      if (!userData) {
+        console.log('Failed to fetch user profile');
+        setLoading(false);
+        return null;
+      }
 
+      // Set user in state
+      setUser(userData);
+      console.log('User data set:', userData);
+
+      // Only redirect after we confirm we have valid user data
+      if (userData && userData.user_type) {
+        console.log('Redirecting based on user type:', userData.user_type);
+        const redirectPath = userData.user_type === 'employer' ? '/employer/dashboard' : '/dashboard';
+        window.location.href = redirectPath;
+      } else {
+        console.log('Invalid user data - not redirecting');
+      }
+
+      setLoading(false);
       return userData;
     } catch (err) {
-      const error = err as Error;
-      setError(error.message);
-      throw error;
+      console.error('Login error:', err);
+      setLoading(false);
+      handleLogout();
+      return null;
     }
   };
 
@@ -145,30 +187,47 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     user_type: 'job_seeker' | 'employer';
   }) => {
     try {
+      setError(null);
       const data = await apiRequest('/api/accounts/register/', 'POST', userData);
-      setToken(data.token);
-      localStorage.setItem('token', data.token);
-      setUser(data.user);
-      return data;
+      if (data) {
+        console.log('Registration response:', data);
+        const newToken = data.token;
+        setToken(newToken);
+        localStorage.setItem('token', newToken);
+        setUser(data.user);
+
+        // Log user properties
+        console.log('Registration Successful - User Properties:', {
+          id: data.user.id,
+          username: data.user.username,
+          email: data.user.email,
+          firstName: data.user.first_name,
+          lastName: data.user.last_name,
+          userType: data.user.user_type,
+          token: newToken,
+          fullUser: data.user
+        });
+
+        // Immediate redirect based on user type
+        const redirectPath = data.user.user_type === 'employer' ? '/employer/dashboard' : '/dashboard';
+        console.log('Redirecting to:', redirectPath);
+        window.location.href = redirectPath; // Force a full page reload and redirect
+        return data;
+      }
+      return null;
     } catch (err) {
-      const error = err as Error;
-      setError(error.message);
-      throw error;
+      handleLogout();
+      return null;
     }
   };
 
   const logout = async () => {
     try {
-      await apiRequest('/api/accounts/logout/', 'POST');
-    } catch (err) {
-      console.error('Logout API error:', err);
+      if (token) {
+        await apiRequest('/api/accounts/logout/', 'POST');
+      }
     } finally {
-      localStorage.removeItem('token');
-      localStorage.removeItem('userId');
-      localStorage.removeItem('username');
-      localStorage.removeItem('userType');
-      setToken(null);
-      setUser(null);
+      handleLogout();
     }
   };
 

@@ -1,22 +1,55 @@
 // components/jobs/FilterPanel.tsx
 "use client";
 
-import CheckInput from "./CheckInput"; // Adjusted path
+import CheckInput from "./CheckInput";
 import Image from "next/image";
 import Box from "@mui/material/Box";
 import Slider from "@mui/material/Slider";
 import { useState } from "react";
+import { JobFilters } from "@/types/job";
+
+interface FilterProps {
+  onFilterChange: (filters: JobFilters) => void;
+}
 
 function valuetext(value: number) {
   return `${value} ETB`;
 }
 
-const Filter = () => {
-  const [value, setValue] = useState<number[]>([20, 2000]); // Updated range from image
+const Filter = ({ onFilterChange }: FilterProps) => {
+  const [salaryRange, setSalaryRange] = useState<number[]>([20, 2000]);
+  const [filters, setFilters] = useState<JobFilters>({
+    job_type: undefined,
+    location: "",
+    experience_level: undefined,
+    salary_min: 20,
+    salary_max: 2000,
+  });
 
-  const handleChange = (event: Event, newValue: number | number[]) => {
-    // MUI type for newValue
-    setValue(newValue as number[]);
+  const handleFilterChange = (key: keyof JobFilters, value: any) => {
+    const newFilters = { ...filters, [key]: value };
+    setFilters(newFilters);
+    onFilterChange(newFilters);
+  };
+
+  const handleSalaryChange = (event: Event, newValue: number | number[]) => {
+    const range = newValue as number[];
+    setSalaryRange(range);
+    handleFilterChange('salary_min', range[0]);
+    handleFilterChange('salary_max', range[1]);
+  };
+
+  const handleReset = () => {
+    const resetFilters = {
+      job_type: undefined,
+      location: "",
+      experience_level: undefined,
+      salary_min: 20,
+      salary_max: 2000,
+    };
+    setFilters(resetFilters);
+    setSalaryRange([20, 2000]);
+    onFilterChange(resetFilters);
   };
 
   return (
@@ -39,25 +72,25 @@ const Filter = () => {
         </select>
       </div>
 
-      <div className="flex flex-col items-start justify-start w-full ">
+      <div className="flex flex-col items-start justify-start w-full">
         <p className="text-sm font-medium mb-1">Job Type</p>
-        <div className="w-full border border-gray-300 rounded-lg p-3 text-sm space-y-1">
-          <CheckInput value={"Full-time"} />
-          <CheckInput value={"Part-time"} />
-          <CheckInput value={"Contract"} />
-          <CheckInput value={"Volunteer"} />
-          <CheckInput value={"Internship"} />
-          <CheckInput value={"Remote"} />
-          <CheckInput value={"Hybrid"} />
-          <CheckInput value={"On-Site"} />
-        </div>
+        <select
+          className="border border-gray-300 pl-3 py-2 rounded-lg w-full text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          value={filters.job_type || ""}
+          onChange={(e) => handleFilterChange('job_type', e.target.value)}
+        >
+          <option value="">All Types</option>
+          <option value="full_time">Full-time</option>
+          <option value="part_time">Part-time</option>
+          <option value="contract">Contract</option>
+        </select>
       </div>
 
       <div className="flex flex-col items-start justify-start w-full">
         <p className="text-sm font-medium mb-1">Location</p>
         <div className="flex items-center gap-2 border border-gray-300 rounded-lg px-3 py-2 w-full focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-transparent">
           <Image
-            src={"/Location.svg"} // Assuming Location.svg is in public folder
+            src={"/Location.svg"}
             alt={"location"}
             width={20}
             height={20}
@@ -66,6 +99,8 @@ const Filter = () => {
             type="text"
             placeholder="Enter your location"
             className="w-full outline-none text-sm"
+            value={filters.location}
+            onChange={(e) => handleFilterChange('location', e.target.value)}
           />
         </div>
       </div>
@@ -73,33 +108,30 @@ const Filter = () => {
       <div className="flex flex-col items-start justify-start w-full">
         <p className="text-sm font-medium mb-1">Experience Level</p>
         <select
-          name="experience-name"
-          id="experience-id"
           className="border border-gray-300 pl-3 py-2 rounded-lg w-full text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          defaultValue="Intermediate"
+          value={filters.experience_level || ""}
+          onChange={(e) => handleFilterChange('experience_level', e.target.value)}
         >
-          <option value="Intermediate">Intermediate</option>
-          <option value="Entry">Entry Level</option>
-          <option value="Medium">Mid-Level</option>
-          <option value="Advanced">Senior / Advanced</option>
+          <option value="">All Levels</option>
+          <option value="entry">Entry Level</option>
+          <option value="mid">Mid-Level</option>
+          <option value="senior">Senior Level</option>
         </select>
       </div>
 
       <div className="flex flex-col items-start justify-start w-full">
         <p className="text-sm font-medium mb-1">Salary Range</p>
         <Box sx={{ width: "100%", paddingX: "5px" }}>
-          {" "}
-          {/* Added padding for thumb overflow */}
           <Slider
             getAriaLabel={() => "Salary range"}
-            value={value}
-            onChange={handleChange}
+            value={salaryRange}
+            onChange={handleSalaryChange}
             valueLabelDisplay="auto"
             getAriaValueText={valuetext}
             min={0}
-            max={5000} // Example max, adjust as needed
+            max={5000}
             sx={{
-              color: "#2563EB", // Blue color for slider
+              color: "#2563EB",
               "& .MuiSlider-thumb": {
                 backgroundColor: "#2563EB",
               },
@@ -109,48 +141,20 @@ const Filter = () => {
             }}
           />
           <div className="flex justify-between text-xs text-gray-500">
-            <span>{valuetext(value[0])}</span>
-            <span>{valuetext(value[1])}</span>
+            <span>{valuetext(salaryRange[0])}</span>
+            <span>{valuetext(salaryRange[1])}</span>
           </div>
         </Box>
       </div>
 
-      <div className="flex flex-col items-start justify-start w-full">
-        <p className="text-sm font-medium mb-1">Input Manually</p>
-        <div className="flex items-center justify-between w-full gap-2 text-sm">
-          <span className="text-gray-600">From</span>
-          <input
-            type="text"
-            className="w-1/3 border border-gray-300 rounded-md px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="e.g. 500"
-          />
-          <span className="text-gray-600">To</span>
-          <input
-            type="text"
-            className="w-1/3 border border-gray-300 rounded-md px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="e.g. 1500"
-          />
-        </div>
-      </div>
-
-      <div className="flex flex-col items-start justify-start w-full">
-        <p className="text-sm font-medium mb-1">Currency</p>
-        <select
-          name="currency-name"
-          id="currency-id"
-          className="border border-gray-300 pl-3 py-2 rounded-lg w-full text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          defaultValue="Dollar"
-        >
-          <option value="Dollar">USD</option>
-          <option value="Euro">EUR</option>
-          <option value="ETB">ETB</option>
-        </select>
-      </div>
-
-      <button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg mt-4 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">
-        Reset all filter
+      <button
+        onClick={handleReset}
+        className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg mt-4 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+      >
+        Reset all filters
       </button>
     </div>
   );
 };
+
 export default Filter;

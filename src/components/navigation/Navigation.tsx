@@ -5,23 +5,31 @@ import WhiteButton from "../WhiteButton";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { Menu, X } from "lucide-react";
+import { Menu, X, Bookmark } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 
 const routes = [
-  { name: "Job Search", path: "" },
-  { name: "My Applications", path: "my-applications" },
-  { name: "Companies", path: "companies" },
-  { name: "Contact Us", path: "contact-us" },
+  { name: "Job Search", path: "dashboard" },
+  { name: "My Applications", path: "dashboard/my-applications" },
+  { name: "Saved Jobs", path: "dashboard/saved-jobs" },
+  { name: "Companies", path: "dashboard/companies" },
+  { name: "Profile", path: "dashboard/profile" },
+  { name: "Contact Us", path: "dashboard/contact-us" },
 ];
 
 const Navigation = () => {
   const pathname = usePathname();
-  const currPage = pathname.split("/")[1] || "";
   const [open, setOpen] = useState(false);
   const { user, logout } = useAuth();
   const router = useRouter();
+
+  const isActivePath = (path: string) => {
+    if (path === 'dashboard') {
+      return pathname === '/dashboard' || pathname === '/';
+    }
+    return pathname === `/${path}` || pathname.startsWith(`/${path}`);
+  };
 
   const handleLogout = async () => {
     await logout();
@@ -29,22 +37,39 @@ const Navigation = () => {
   };
 
   return (
-    <nav className="flex justify-between items-center w-full py-3 px-4 border-b relative">
+    <nav className="flex justify-between items-center w-full py-3 px-4 border-b relative bg-white z-50">
       {/* Logo */}
       <div className="flex items-center gap-2">
-        <Image src="/Logo.svg" alt="logo" width={40} height={40} />
-        <span className="text-xl font-bold hidden sm:inline">JOB SPHERE</span>
+        <Link href="/dashboard">
+          <div className="flex items-center gap-2">
+            <Image src="/Logo.svg" alt="logo" width={40} height={40} />
+            <span className="text-xl font-bold hidden sm:inline">JOB SPHERE</span>
+          </div>
+        </Link>
       </div>
 
       <div className="hidden md:flex items-center gap-8">
         {routes.map((data, index) => (
-          <Link href={`/${data.path}`} key={index}>
-            <div>{data.name}</div>
-            {currPage == data.path ? (
-              <div className="w-full h-1 rounded-full bg-[#0034D1] animate-slide-in"></div>
-            ) : (
-              <div className="w-full h-1 rounded-full white"></div>
-            )}
+          <Link 
+            href={`/${data.path}`} 
+            key={index}
+            className="group relative"
+          >
+            <div className={`flex items-center gap-1 ${
+              isActivePath(data.path) 
+                ? 'text-blue-600' 
+                : 'text-gray-600 hover:text-blue-600'
+            } transition-colors`}>
+              {data.name === "Saved Jobs" && (
+                <Bookmark className="w-4 h-4" />
+              )}
+              {data.name}
+            </div>
+            <div className={`absolute bottom-0 left-0 h-0.5 bg-blue-600 transition-all duration-300 ${
+              isActivePath(data.path)
+                ? 'w-full opacity-100'
+                : 'w-0 opacity-0 group-hover:w-full group-hover:opacity-100'
+            }`} />
           </Link>
         ))}
       </div>
@@ -92,10 +117,13 @@ const Navigation = () => {
                   key={index}
                   href={`/${data.path}`}
                   onClick={() => setOpen(false)}
-                  className={`text-base font-medium ${
-                    currPage === data.path ? "text-[#0034D1]" : "text-gray-700"
-                  }`}
+                  className={`text-base font-medium flex items-center gap-2 ${
+                    isActivePath(data.path) 
+                      ? 'text-blue-600' 
+                      : 'text-gray-700 hover:text-blue-600'
+                  } transition-colors`}
                 >
+                  {data.name === "Saved Jobs" && <Bookmark className="w-4 h-4" />}
                   {data.name}
                 </Link>
               ))}
@@ -123,7 +151,6 @@ const Navigation = () => {
               )}
             </div>
           </div>
-
           <div className="flex-1" onClick={() => setOpen(false)}></div>
         </div>
       )}

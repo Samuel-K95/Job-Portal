@@ -2,7 +2,7 @@ import Image from "next/image";
 
 const Hero = () => {
   return (
-    <section className="h-[60vh] bg-[#0034D1] flex w-full">
+    <section className="h-[60vh] bg-[#0034D1] flex w-full relative z-0">
       <div className="w-1/2 flex items-center justify-center animate-slide-up">
         <div className="w-4/5 md:w-[60%] flex flex-col gap-10">
           <p className="text-xl md:text-5xl font-extrabold text-white">
@@ -25,4 +25,5 @@ const Hero = () => {
     </section>
   );
 };
+
 export default Hero;
